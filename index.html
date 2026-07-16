@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[ THEORY 7 // ARCHIVE_DECK_FINAL ]</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Orbitron:wght@700&display=swap');
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Courier Prime', monospace;
+            image-rendering: pixelated;
+
+        }
+
+        body {
+            background: linear-gradient(to bottom, rgba(20, 20, 25, 0.8), rgba(100, 70, 50, 0.8)),
+                url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1600&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            height: fit-content;
+            padding: 15px;
+            overflow: scroll;
+            color: #d1d1d1;
+            font-size: 12px;
+            scrollbar-width: none;
+            zoom: 110%;
+
+        }
+
+        .industrial-panel {
+            background: #555559;
+            border-top: 2px solid #8e8e93;
+            border-left: 2px solid #8e8e93;
+            border-right: 2px solid #2c2c2e;
+            border-bottom: 2px solid #2c2c2e;
+            box-shadow: inset 1px 1px 0px #fff, 3px 3px 10px rgba(0, 0, 0, 0.6);
+            padding: 4px;
+        }
+
+        .inner-inset {
+            background: #3a3a3c;
+            border-top: 2px solid #1c1c1e;
+            border-left: 2px solid #1c1c1e;
+            border-right: 2px solid #636366;
+            border-bottom: 2px solid #636366;
+            padding: 8px;
+        }
+
+        .window-title {
+            background: #222224;
+            color: #ff6600;
+            padding: 4px 8px;
+            font-weight: bold;
+            font-size: 10px;
+            letter-spacing: 1px;
+            border-bottom: 2px solid #555559;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* --- DASHBOARD LAYOUT --- */
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 15px;
+            max-width: 1350px;
+            margin: 0 auto;
+            height: calc(1000px - 80px);
+        }
+
+        .main-console {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            height: 100%;
+        }
+
+        .sidebar-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            height: 100%;
+        }
+
+        /* --- HARDWARE INTERACTION CONTROLS --- */
+        .hw-btn {
+            background: #444446;
+            border: 1px solid #8e8e93;
+            border-bottom: 2px solid #1c1c1e;
+            border-right: 2px solid #1c1c1e;
+            color: #fff;
+            font-size: 8px;
+            padding: 5px 4px;
+            text-align: center;
+            text-transform: uppercase;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .hw-btn:active,
+        .hw-btn.active {
+            background: #ff6600;
+            color: #000;
+            border: 1px solid #000;
+            box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.8);
+        }
+
+        .hw-btn.danger {
+            background: #882222;
+            border-color: #aa4444;
+        }
+
+        .hw-input {
+            background: #111;
+            border: 1px solid #ff6600;
+            padding: 5px;
+            color: #ff6600;
+            font-size: 10px;
+            width: 100%;
+        }
+
+        /* --- AUDIO RACK ARCHITECTURE --- */
+        .lcd-display {
+            background: #0d0d0f;
+            border: 2px solid #555559;
+            padding: 8px;
+            margin-bottom: 8px;
+        }
+
+        .fft-equalizer {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 3px;
+            height: 100px;
+            background: #050507;
+            padding: 6px;
+            border: 1px solid #2c2c2e;
+            align-items: flex-end;
+        }
+
+        .fft-bar {
+            background: linear-gradient(to top, #ff6600 70%, #ffcc00 100%);
+            width: 100%;
+            height: 0%;
+            border-top: 1px solid #fff;
+        }
+
+        .playlist-container {
+            background: #222224;
+            border: 1px solid #1c1c1e;
+            height: fit-content;
+            max-height: 450;
+            overflow-y: scroll;
+            scroll-behavior: smooth;
+            margin-top: 8px;
+        }
+
+        .playlist-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px;
+            border-bottom: 1px solid #3a3a3c;
+            cursor: pointer;
+        }
+
+        .playlist-item:hover {
+            background: #2c2c2e;
+        }
+
+        .playlist-item.active {
+            background: rgba(255, 102, 0, 0.15);
+            border-left: 3px solid #ff6600;
+        }
+
+        /* --- NEW ELEMENTS: SLIDER RACK --- */
+        .slider-rack {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 6px;
+            background: #222224;
+            padding: 10px;
+            border: 1px solid #1c1c1e;
+        }
+
+        .slider-cell {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .slider-cell span {
+            font-size: 8px;
+            color: #8e8e93;
+        }
+
+        /* Vintage Attenuator Sliders */
+        .hw-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 12px;
+            height: 80px;
+            background: #111;
+            border: 1px solid #555559;
+            outline: none;
+            writing-mode: bt-lr;
+            /* Vertical orientation legacy standard */
+            direction: rtl;
+        }
+
+        .hw-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 10px;
+            background: #ff6600;
+            border: 1px solid #fff;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+        }
+
+        /* Terminal Display Box */
+        .log-terminal {
+            background: #0d0d0f;
+            border: 1px solid #1c1c1e;
+            padding: 8px;
+            height: 75px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 9px;
+            color: #00ff66;
+            line-height: 1.3;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .logo-box {
+            background: #222224;
+            padding: 4px 15px;
+            border: 2px solid #ff6600;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 20px;
+            color: #fff;
+            transform: skewX(-10deg);
+            box-shadow: 2px 2px 0px #ff6600;
+        }
+
+        .logo-box span {
+            color: #ff6600;
+        }
+
+        footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: #222224;
+            border-top: 2px solid #555559;
+            padding: 4px 15px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 9px;
+            color: #8e8e93;
+            z-index: 1000;
+        }
+
+        .slider-cell {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            background: #2c2c2e;
+            padding: 8px 2px;
+            border: 1px solid #1c1c1e;
+        }
+
+        .slider-cell span {
+            font-size: 9px;
+            font-weight: bold;
+            color: #8e8e93;
+        }
+
+        /* Clear default styling and enforce layout constraints */
+        .hw-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 6px;
+            height: 100px;
+            background: #111113;
+            border: 1px solid #555559;
+            outline: none;
+            /* Forces vertical display layout across browsers */
+            writing-mode: vertical-lr;
+            direction: rtl;
+            cursor: pointer;
+        }
+
+        /* Chrome, Safari, Edge slider thumb mapping */
+        .hw-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 14px;
+            height: 8px;
+            background: #ff6600;
+            border: 1px solid #ffffff;
+            box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.8);
+            cursor: row-resize;
+        }
+
+        /* Firefox slider thumb mapping */
+        .hw-slider::-moz-range-thumb {
+            width: 14px;
+            height: 8px;
+            background: #ff6600;
+            border: 1px solid #ffffff;
+            box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.8);
+            border-radius: 0;
+            cursor: row-resize;
+        }
+
+        .fav-toggle {
+            background: none;
+            border: none;
+            color: #555559;
+            font-size: 12px;
+            cursor: pointer;
+            padding: 0 6px;
+            font-weight: bold;
+        }
+
+        .fav-toggle.active {
+            color: #ff6600;
+            text-shadow: 0 0 4px rgba(255, 102, 0, 0.6);
+        }
+
+        input {
+
+
+            padding: 1px;
+            border-radius: 5px;
+
+        }
+
+        input#songSearch::selection {
+
+            color: rgb(41, 17, 255);
+            background-color: rgb(248, 123, 21);
+        }
+
+        input#songSearch:focus {
+            color: transparent;
+            background-color: transparent;
+            outline: 1px solid black;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div class="logo-box">THEORY<span>7</span></div>
+        <div class="industrial-panel" style="padding: 2px 10px; color: #ff6600; font-size: 10px; font-weight: bold;">
+            DSP ENGINE // INDEXED_DB PERSISTENCE CONSOLE
+        </div>
+    </header>
+
+    <div class="dashboard">
+
+        <div class="main-console">
+
+            <div class="industrial-panel">
+                <div class="window-title"><span>LOCAL AUDIO INGESTION CELL</span></div>
+                <div class="inner-inset">
+                    <div
+                        style="background: #ff6600; color: #000; padding: 10px; margin-bottom: 10px; font-weight: bold;">
+                        <p style="font-size: 11px;">INDEXED_DB CONNECTED: Media loaded here bypasses localStorage limits
+                            and survives page updates.</p>
+                    </div>
+
+                    <div
+                        style="display: flex; gap: 10px; background: #2c2c2e; padding: 10px; border: 1px solid #1c1c1e; align-items: center;">
+                        <input type="file" id="track-file" class="hw-input" accept="audio/*" style="flex: 1;" multiple>
+                        <button class="hw-btn" style="background:#ff6600; color:#000; padding: 7px 15px;"
+                            onclick="addLocalTrack()">MOUNT FILE</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="industrial-panel">
+                <div class="window-title"><span>RACK_02 // HARDWARE ATTENUATOR PRESETS</span></div>
+                <div class="inner-inset">
+                    <div style="display: grid; grid-template-columns: repeat(10, 1fr); gap: 6px; background: #222224; padding: 10px; border: 1px solid #1c1c1e;"
+                        id="slider-rack">
+                    </div>
+                </div>
+            </div>
+
+            <div class="industrial-panel" style="margin-top: 15px;">
+                <div class="window-title"><span>RACK_03 // FAVORITES MEMORY MODULE</span></div>
+                <div class="inner-inset">
+                    <div class="playlist-container" id="favRack" style="height: 100px; margin-top: 0;">
+                    </div>
+                </div>
+            </div>
+
+
+
+            <div class="industrial-panel">
+                <div class="window-title"><span>DIAGNOSTIC TELEMETRY MATRIX LOGS</span></div>
+                <div class="inner-inset">
+                    <div class="log-terminal" id="terminal-log">
+                        > Core loaded. Standing by for binary audio mounts...
+                    </div>
+                </div>
+            </div>
+
+            <audio id="audio-pipeline"></audio>
+        </div>
+
+        <div class="sidebar-controls">
+            <div class="industrial-panel" style="height:max-content">
+                <div class="window-title"><span>RACK_01 // MULTI_DECK</span></div>
+                <div class="hw-input" style="font-size: 12px;">
+                    <span style="display: flex; align-items: center; justify-content: space-between; padding: 2px;">
+                        <label for="songSearch"> Search </label>
+                        <input style="background: transparent; 
+                               color: rgb(255, 255, 255);
+                               width: 250px;
+                               height: 25px;
+                               font-size: 14px;" type="search" name="songSearch" id="songSearch">
+                    </span>
+
+                </div>
+                <div class="inner-inset" style="height: fit-content; display:flex; flex-direction:column;">
+
+                    <div class="lcd-display">
+                        <div
+                            style="display:flex; justify-content:space-between; font-size:9px; color:#ff6600; margin-bottom:6px;">
+                            <span id="lcd-title">NO FILE MOUNTED</span>
+                            <span id="lcd-state">[IDLE]</span>
+                        </div>
+
+                        <div class="fft-equalizer" id="eq-grid">
+                            <div class="fft-bar"></div>
+                            <div class="fft-bar"></div>
+                            <div class="fft-bar"></div>
+                            <div class="fft-bar"></div>
+                            <div class="fft-bar"></div>
+                            <div class="fft-bar"></div>
+                            <div class="fft-bar"></div>
+                            <div class="fft-bar"></div>
+                            <div class="fft-bar"></div>
+                            <div class="fft-bar"></div>
+                        </div>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns: repeat(6, 1fr); gap:4px; margin-bottom:10px;">
+                        <button class="hw-btn" onclick="playAudio()">PLAY</button>
+                        <button class="hw-btn" onclick="pauseAudio()">PAUSE</button>
+                        <button class="hw-btn" onclick="stopAudio()">STOP</button>
+                        <button class="hw-btn" onclick="playAll()">SHUFFLE</button>
+                        <button class="hw-btn danger" onclick="removeCurrentTrack()">REM</button>
+
+                        <input class="hw-btn" name="volume" id="volume" oninput="changeVolume()" type="range" min=0
+                            max=200 value=100 /></span>
+                    </div>
+
+                    <div class="window-title"><span>INDEXED ARCHIVE LIST</span></div>
+                    <div class="playlist-container" id="playlist-rack"></div>
+
+                </div>
+            </div>
+        </div>
+
+
+
+    </div>
+
+    <footer>
+        <div>© THEORY7 EXTENSION [2001 - 2026]</div>
+        <div>DB STACK: INDEXED_DB // EQ CHANNELS: ACTIVE</div>
+    </footer>
+
+    <script>
+        let playlist = [];
+        let currentTrackIndex = -1;
+
+        let audioCtx = null;
+        let audioSrc = null;
+        let analyser = null;
+        let dataArray = [];
+        let db = null;
+        songSearch.value = '';
+
+        // Equalizer gain filters array
+        let filters = [];
+        const freqs = [60, 180, 300, 600, 1000, 3000, 6000, 12000, 14000, 16000];
+
+        const audio = document.getElementById('audio-pipeline');
+        const fftBars = document.querySelectorAll('.fft-bar');
+        const searchInput = songSearch;
+        let debounceTimer
+        let debounceTime = 500;
+        let searchArray = []
+
+        class TrieNode {
+
+            constructor() {
+
+                this.children = {}
+                this.songs = []
+                this.isEndOfWord = false
+            }
+        }
+
+        let savedData = localStorage.getItem("cached_trie");
+
+        if (savedData)
+            masterRoot = JSON.parse(savedData);
+        else
+            masterRoot = new TrieNode();
+
+        searchInput.addEventListener("input", (e) => {
+
+
+            clearInterval(debounceTimer)
+
+            debounceTimer = setTimeout(() => {
+
+                if (e.target.value === '') {
+                    searchArray = []
+                    renderPlaylist();
+                    return;
+                }
+
+                else {
+
+                    const normalized = e.target.value.toLowerCase().replace(/\s+/g, '').replace(/\d+\./g, '');
+
+                    let current = masterRoot;
+
+                    let i;
+
+                    for (i = 0; i < normalized.length; i++) {
+
+                        if (!current.children[normalized.charAt(i)])
+                            return searchArray;
+                        else
+                            current = current.children[normalized.charAt(i)]
+
+                    }
+
+                    searchArray = []
+                    searchArray = recursiveDFS(searchArray, current)
+
+                    console.log(searchArray)
+                    renderPlaylist();
+
+                }
+            }, debounceTime)
+
+
+        })
+
+        function recursiveDFS(arr, node) {
+
+
+
+            if (node.isEndOfWord) {
+
+                searchArray.push(node.songs)
+            }
+
+            for (let char in node.children) {
+
+                recursiveDFS(arr, node.children[char]);
+            }
+
+
+
+            return searchArray;
+
+        }
+
+        // Updates our database schema tracking map
+        async function addLocalTrack() {
+
+            const fileInput = document.getElementById('track-file');
+            const tracks = fileInput;
+            const filelist = tracks.files
+
+
+            if (filelist.length == 0) {
+                alert("SYSTEM ERROR: Secure audio source target empty.");
+                return;
+            }
+
+
+            for (let index = 0; index < filelist.length; index++) {
+
+                const track = filelist[index];
+                const fileHash = await getFileHash(track);
+
+                console.log("Hash of track " + track.name + " is " + fileHash);
+
+                if (typeof logToTerminal === "function") logToTerminal(`Analyzing metadata packet: ${filelist[index].name}`);
+
+                let current = masterRoot;
+
+                let songName = filelist[index].name.toLowerCase().substring(4).replace(/\s+/g, '').replace(/\..*/g, '');
+
+                const reader = new FileReader();
+
+                reader.onload = function (e) {
+                    const transaction = db.transaction(["track"], "readwrite");
+                    const store = transaction.objectStore("track");
+
+                    // Unified data structure payload template
+                    const trackData = {
+                        hash: fileHash,
+                        name: track.name,
+                        data: e.target.result,
+                        isFavorite: false // Default to standard stream state
+                    };
+
+                    const addReq = store.add(trackData);
+
+                    addReq.onsuccess = function () {
+
+                        if (typeof logToTerminal === "function") logToTerminal("Target stream permanently written to DB blocks.");
+                        loadTracksFromDB();
+                        fileInput.value = null;
+
+                        for (let i = 0; i < songName.length; i++) {
+
+                            let currChar = songName.charAt(i);
+
+                            console.log(current)
+
+                            if (!current.children[currChar]) {
+
+                                current.children[currChar] = new TrieNode();
+
+                            }
+
+                            current = current.children[currChar];
+
+                        }
+
+                        current.isEndOfWord = true
+                        current.songs.push(songName)
+                        console.log(masterRoot)
+
+                        let cached_trie = JSON.stringify(masterRoot);
+                        localStorage.setItem("cached_trie", cached_trie);
+
+                    };
+
+                    addReq.onerror = function (e) {
+
+                        if (e.target.error.name === "ConstraintError") {
+                            logToTerminal(
+                                `Target "${track.name.substring(0, 2)}" already present in the DB blocks.`
+                            );
+                        } else {
+                            logToTerminal(
+                                `Failed to add "${track.name}": ${e.target.error.message}`
+                            );
+                        }
+                    }
+                };
+                reader.readAsDataURL(track);
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            buildManualSliders();
+            initDatabase();
+        });
+
+        function logToTerminal(message) {
+            const logBox = document.getElementById('terminal-log');
+            logBox.innerHTML += `<br>> ${message}`;
+            logBox.scrollTop = logBox.scrollHeight;
+        }
+
+        // Initialize Browser IndexedDB Space
+
+        function initDatabase() {
+            const request = indexedDB.open("Theory7AudioDB", 1);
+
+            request.onupgradeneeded = function (e) {
+
+                db = e.target.result;
+                const store = db.createObjectStore
+                    ("track",
+                        {
+                            keyPath: "id",
+                            autoIncrement: true
+                        });
+
+                store.createIndex("hash", "hash", { unique: true });
+            };
+
+
+            request.onsuccess = function (e) {
+                db = e.target.result;
+                logToTerminal("Database engine initialization successful.");
+                loadTracksFromDB();
+            };
+
+            request.onerror = function (e) {
+                logToTerminal("Database initialization unsuccessful " + e.target.error);
+            }
+        }
+
+        function initAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                audioSrc = audioCtx.createMediaElementSource(audio);
+
+                // Build 10-Band BiquadFilter frequency node structure
+                let lastNode = audioSrc;
+                freqs.forEach((freq) => {
+                    let filter = audioCtx.createBiquadFilter();
+                    filter.type = 'peaking';
+                    filter.frequency.value = freq;
+                    filter.Q.value = 1.0;
+                    filter.gain.value = 0;
+
+                    lastNode.connect(filter);
+                    lastNode = filter;
+                    filters.push(filter);
+                });
+
+                analyser = audioCtx.createAnalyser();
+                lastNode.connect(analyser);
+                analyser.connect(audioCtx.destination);
+
+                analyser.fftSize = 64;
+                dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+                renderFFT();
+            }
+        }
+
+        function loadTracksFromDB() {
+            const transaction = db.transaction(["track"], "readonly");
+            const store = transaction.objectStore("track");
+            const getAllReq = store.getAll();
+
+            getAllReq.onsuccess = function (e) {
+                playlist = e.target.result;
+                renderPlaylist();
+                renderFavs();
+            };
+        }
+
+        async function selectTrack(index) {
+            initAudioContext();
+            currentTrackIndex = index;
+            audio.src = playlist[currentTrackIndex].data;
+            document.getElementById('lcd-title').innerText = playlist[currentTrackIndex].name.toUpperCase().substring(0, 22);
+            logToTerminal(`Streaming initialized channel data for node ${index + 1}`);
+            renderPlaylist();
+            playAudio();
+        }
+
+        function playAudio() {
+            if (currentTrackIndex === -1 && playlist.length > 0) { selectTrack(0); return; }
+            if (currentTrackIndex !== -1) {
+                if (audioCtx && audioCtx.state === 'suspended') { audioCtx.resume(); }
+                audio.play();
+                document.getElementById('lcd-state').innerText = "[PLAYING]";
+                document.getElementById('lcd-state').style.color = "#00ff66";
+            }
+        }
+
+        function pauseAudio() {
+            audio.pause();
+            document.getElementById('lcd-state').innerText = "[PAUSED]";
+            document.getElementById('lcd-state').style.color = "#ffcc00";
+        }
+
+        function stopAudio() {
+            audio.pause();
+            audio.currentTime = 0;
+            document.getElementById('lcd-state').innerText = "[STOPPED]";
+            document.getElementById('lcd-state').style.color = "#ff6600";
+            fftBars.forEach(bar => bar.style.height = '0%');
+        }
+
+        function playAll() {
+
+            let index = Math.floor(Math.random() * playlist.length);
+
+            audio.src = playlist[index].data;
+            console.log(index)
+
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+
+            }
+            selectTrack(index);
+            audio.play();
+            document.getElementById('lcd-state').innerText = "[PLAYING]";
+            document.getElementById('lcd-state').style.color = "#00ff66";
+
+            audio.addEventListener("ended", () => {
+                console.log(audio)
+                index++;
+                index = index % playlist.length;
+                selectTrack(index);
+                audio.play();
+            });
+
+        }
+
+        function removeCurrentTrack() {
+            if (currentTrackIndex === -1) return;
+
+            const targetId = playlist[currentTrackIndex].id;
+            stopAudio();
+
+            const transaction = db.transaction(["track"], "readwrite");
+            const store = transaction.objectStore("track");
+            const delReq = store.delete(targetId);
+
+            delReq.onsuccess = function () {
+                logToTerminal("Deallocation procedure executed on target key.");
+                currentTrackIndex = -1;
+                audio.src = '';
+                document.getElementById('lcd-title').innerText = "NO FILE MOUNTED";
+                loadTracksFromDB();
+            };
+        }
+
+        async function renderFFT() {
+            if (document.getElementById('lcd-state').innerText === "[PLAYING]" && analyser) {
+                analyser.getByteFrequencyData(dataArray);
+                for (let i = 0; i < 10; i++) {
+                    const value = dataArray[i * 2] || 0;
+                    const percent = (value / 255) * 100;
+                    fftBars[i].style.height = `${percent}%`;
+                }
+            }
+
+            requestAnimationFrame(renderFFT);
+        }
+
+        function changeVolume() {
+
+            audio.volume = document.getElementById("volume").value / 200;
+            console.log(audio.volume)
+        }
+
+
+        // 2. Build UI Controls Automatically 
+        async function buildManualSliders() {
+            const container = document.getElementById('slider-rack');
+            container.innerHTML = ''; // Clear out initialization cells
+
+            freqs.forEach((freq, idx) => {
+                const cell = document.createElement('div');
+                cell.className = 'slider-cell';
+
+                let displayHz = freq >= 1000 ? (freq / 1000) + 'k' : freq;
+                cell.innerHTML = `
+            <span>${displayHz}</span>
+            <input type="range" class="hw-slider" min="-12" max="12" value="0" step="1" id="slider-${idx}" oninput="updateGain(${idx}, this.value)">
+            <span id="gain-${idx}">0dB</span>
+        `;
+                container.appendChild(cell);
+            });
+        }
+
+        // 3. Inject this segment INTO your existing initAudioContext() function
+        function connectEqualizerFilters(audioSrc, audioCtx, destinationNode) {
+            let lastNode = audioSrc;
+            filters = []; // Clear array map resetting chains
+
+            freqs.forEach((freq) => {
+                let filter = audioCtx.createBiquadFilter();
+                filter.type = 'peaking';
+                filter.frequency.value = freq;
+                filter.Q.value = 1.0; // Filter bandwidth calculation curve tightness
+                filter.gain.value = 0; // Initialize at perfect flatline unity gain
+
+                lastNode.connect(filter);
+                lastNode = filter; // Pipe into next frequency node module
+                filters.push(filter);
+            });
+
+            // Finally connect the end of the chain to your FFT analyzer or speaker node
+            lastNode.connect(destinationNode);
+        }
+
+        // 4. Live Audio Engine Interceptor Callback Function
+        function updateGain(index, val) {
+            document.getElementById(`gain-${index}`).innerText = `${val}dB`;
+            if (filters[index]) {
+                filters[index].gain.value = parseFloat(val);
+            }
+        }
+
+
+        async function getFileHash(file) {
+
+            const buffer = await file.arrayBuffer();
+            const hashBuffer = await crypto.subtle.digest("SHA-256", buffer);
+
+            return Array.from(new Uint8Array(hashBuffer))
+                .map(b => b.toString(16).padStart(2, "0"))
+                .join("");
+
+        }
+
+        // Renders the single unified playlist rack array directly into the UI view frame
+        async function renderPlaylist() {
+            const rack = document.getElementById('playlist-rack');
+            if (!rack) return;
+            rack.innerHTML = '';
+
+            if (playlist.length === 0) {
+                rack.innerHTML = '<div style="padding:10px; color:#666; text-align:center;">[ STORAGE REGISTERS EMPTY ]</div>';
+                return;
+            }
+
+            playlist.forEach((track, idx) => {
+
+                // clicking the text loads the audio track
+                if (searchArray.length > 0) {
+
+                    searchArray.forEach((filter, idx2) => {
+                        if (filter == track.name.toLowerCase().substring(4).replace(/\s+/g, '').replace(/\..*/g, '')) {
+
+                            const row = document.createElement('div');
+                            row.className = `playlist-item ${idx2 === currentTrackIndex ? 'active' : ''}`;
+
+                            console.log(filter)
+
+                            row.innerHTML = `
+                   <div style="flex: 1; display: flex; align-items: center;" onclick="selectTrack(${idx})">
+                <span style="color:${idx === currentTrackIndex ? '#ff6600' : '#fff'}; font-weight:bold; margin-right: 5px;">
+                    ${idx2 + 1}.
+                </span>
+                <span style="color:${idx === currentTrackIndex ? '#ff6600' : '#ccc'};">
+                    ${track.name.substring(4)}
+                </span>
+            </div>
+            <button class="fav-toggle ${track.isFavorite ? 'active' : ''}" onclick="toggleFavorite(${idx}, event)">
+                ${track.isFavorite ? '★' : '☆'}
+            </button>`
+
+                            rack.appendChild(row);
+
+                        }
+                    })
+
+                }
+                else {
+
+                    const row = document.createElement('div');
+                    row.className = `playlist-item ${idx === currentTrackIndex ? 'active' : ''}`;
+
+                    row.innerHTML = `
+                <div style="flex: 1; display: flex; align-items: center;" onclick="selectTrack(${idx})">
+                <span style="color:${idx === currentTrackIndex ? '#ff6600' : '#fff'}; font-weight:bold; margin-right: 5px;">
+                    ${idx + 1}.
+                </span>
+                <span style="color:${idx === currentTrackIndex ? '#ff6600' : '#ccc'};">
+                    ${track.name.substring(4)}...
+                </span>
+            </div>
+            <button class="fav-toggle ${track.isFavorite ? 'active' : ''}" onclick="toggleFavorite(${idx}, event)">
+                ${track.isFavorite ? '★' : '☆'}
+            </button>
+        `;
+                    rack.appendChild(row);
+
+                }
+            });
+
+        }
+
+        async function renderFavs() {
+
+            const favoriteTracks = playlist.map((track, originalIndex) => ({ ...track, originalIndex })).filter(item => item.isFavorite);
+
+
+            favRack = document.getElementById("favRack");
+            favRack.innerHTML = '';
+
+            if (favoriteTracks.length === 0) {
+                favRack.innerHTML = '<div style="padding:10px; color:#555559; text-align:center;">[ NO FAVORITE SIGNALS CACHED ]</div>';
+            } else {
+                favoriteTracks.forEach((track, favIdx) => {
+                    const row = document.createElement('div');
+                    // Keep active glow highlight synced if this favorite track is currently playing
+                    row.className = `playlist-item ${track.originalIndex === currentTrackIndex ? 'active' : ''}`;
+                    row.onclick = () => selectTrack(track.originalIndex); // Points directly to main index position
+
+                    row.innerHTML = `
+                        <div style="display: flex; align-items: center;">
+                            <span style="color:#ff6600; font-weight:bold; margin-right: 8px;">★ 0${favIdx + 1}</span>
+                            <span style="color:${track.originalIndex === currentTrackIndex ? '#ff6600' : '#fff'};">${track.name.substring(4)}...</span>
+                        </div>
+                        <span style="color:#666; font-size:9px;">[FAV_LINK]</span>
+                    `;
+
+                    favRack.appendChild(row);
+
+                });
+
+            }
+
+
+        }
+
+        // Toggles favorite state indicator and saves data payload right back to IndexedDB blocks
+        function toggleFavorite(index, event) {
+            // Intercept event to prevent track from immediately loading when clicking toggle button
+            event.stopPropagation();
+
+            const track = playlist[index];
+            track.isFavorite = !track.isFavorite;
+
+            const transaction = db.transaction(["track"], "readwrite");
+            const store = transaction.objectStore("track");
+
+            // Put updates the record using its structural primary key ID match
+            const updateReq = store.put(track);
+
+            updateReq.onsuccess = function () {
+                if (typeof logToTerminal === "function") {
+                    logToTerminal(`Track [${track.name.substring(0, 10)}] favorite configuration updated.`);
+                }
+                renderPlaylist();
+                renderFavs(); // Re-render lists layout state dynamically
+            };
+        }
+
+
+
+    </script>
+</body>
+
+</html>
