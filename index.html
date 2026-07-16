@@ -341,6 +341,13 @@
             font-weight: bold;
         }
 
+        button>img{
+
+            height: 20px;
+            width: 20px;
+            image-rendering : optimizeSpeed;
+        }
+
         .fav-toggle.active {
             color: #ff6600;
             text-shadow: 0 0 4px rgba(255, 102, 0, 0.6);
@@ -467,12 +474,13 @@
                         </div>
                     </div>
 
+                  
                     <div style="display:grid; grid-template-columns: repeat(6, 1fr); gap:4px; margin-bottom:10px;">
-                        <button class="hw-btn" onclick="playAudio()">PLAY</button>
-                        <button class="hw-btn" onclick="pauseAudio()">PAUSE</button>
-                        <button class="hw-btn" onclick="stopAudio()">STOP</button>
-                        <button class="hw-btn" onclick="playAll()">SHUFFLE</button>
-                        <button class="hw-btn danger" onclick="removeCurrentTrack()">REM</button>
+                        <button class="hw-btn" onclick="playAudio()"><img src="./icons/play2.svg" alt="" srcset=""></button>
+                        <button class="hw-btn" onclick="pauseAudio()"><img src="./icons/pause2.svg" alt="" srcset=""></button>
+                        <button class="hw-btn" onclick="stopAudio()"><img src="./icons/stop2.svg" alt="" srcset=""></button>
+                        <button class="hw-btn" onclick="playAll()"><img src="./icons/shuffle2.svg" alt="" srcset=""></button>
+                        <button class="hw-btn danger" onclick="removeCurrentTrack()"><img src="./icons/bin.png" alt="REM" srcset=""></button>
 
                         <input class="hw-btn" name="volume" id="volume" oninput="changeVolume()" type="range" min=0
                             max=200 value=100 /></span>
@@ -934,6 +942,12 @@
             if (!rack) return;
             rack.innerHTML = '';
 
+
+            const fav = "./icons/fav.png";
+            const unfav = "./icons/unfav.png";
+
+            console.log(fav);
+
             if (playlist.length === 0) {
                 rack.innerHTML = '<div style="padding:10px; color:#666; text-align:center;">[ STORAGE REGISTERS EMPTY ]</div>';
                 return;
@@ -962,7 +976,7 @@
                 </span>
             </div>
             <button class="fav-toggle ${track.isFavorite ? 'active' : ''}" onclick="toggleFavorite(${idx}, event)">
-                ${track.isFavorite ? '★' : '☆'}
+                <img src=${track.isFavorite ? fav : unfav} >
             </button>`
 
                             rack.appendChild(row);
@@ -986,7 +1000,7 @@
                 </span>
             </div>
             <button class="fav-toggle ${track.isFavorite ? 'active' : ''}" onclick="toggleFavorite(${idx}, event)">
-                ${track.isFavorite ? '★' : '☆'}
+                  <img src=${track.isFavorite ? fav : unfav} >
             </button>
         `;
                     rack.appendChild(row);
