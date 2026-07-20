@@ -202,20 +202,7 @@
             color: #8e8e93;
         }
 
-        /* Vintage Attenuator Sliders */
-        .hw-slider {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 12px;
-            height: 80px;
-            background: #111;
-            border: 1px solid #555559;
-            outline: none;
-            writing-mode: bt-lr;
-            /* Vertical orientation legacy standard */
-            direction: rtl;
-        }
-
+    
         .hw-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
@@ -320,6 +307,53 @@
             cursor: row-resize;
         }
 
+        .seek-container {
+  background: #111;
+  margin-top: 10px;
+  border-bottom: 1px solid #555;
+  border-right: 1px solid #555;
+  border-top: 1px solid #000;
+  border-left: 1px solid #000;
+  height: 5px;
+  display: flex;
+  align-items: center;
+        }
+
+        .seek-slider{
+
+       -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  margin-top: 5px;
+  height: 10px;
+  background: repeating-linear-gradient(
+    90deg,
+    #111,
+    #111 3px,
+    #333 3px,
+    #333 4px
+  ); /* Creates a lined/segmented track pattern */
+  outline: none;
+
+        }
+
+        .seek-slider:active{
+            background: #ff6600;
+            
+        }
+
+  .seek-slider::-moz-range-thumb{      
+  width: 14px;
+  padding-top: 1px;
+  height: 10px;
+  background: #ff6600;
+  border: 1px solid #000;
+  box-shadow: inset 1px 1px 0px #fff;
+  cursor: pointer;
+  border-radius: 2px;
+
+  }
+
         /* Firefox slider thumb mapping */
         .hw-slider::-moz-range-thumb {
             width: 14px;
@@ -388,6 +422,7 @@
 
         <div class="main-console">
 
+            <audio id="audio-pipeline"></audio>
             <div class="industrial-panel">
                 <div class="window-title"><span>LOCAL AUDIO INGESTION CELL</span></div>
                 <div class="inner-inset">
@@ -434,7 +469,6 @@
                 </div>
             </div>
 
-            <audio id="audio-pipeline"></audio>
         </div>
 
         <div class="sidebar-controls">
@@ -474,15 +508,22 @@
                         </div>
                     </div>
 
-                  
+                  <div style="display: grid; grid-template-columns: 8fr 1fr;">
+                    
+                    <div class="">
+                        <input class="seek-slider" type="range" name="seek" id="seekBar" value="0" min="0" max=auto style="margin-bottom: 10px;" />
+                    </div>
+                    <span id="time" style="margin: 5px;">00:00</span>
+                  </div>
+
                     <div style="display:grid; grid-template-columns: repeat(6, 1fr); gap:4px; margin-bottom:10px;">
+                        
                         <button class="hw-btn" onclick="playAudio()"><img src="./icons/play2.svg" alt="" srcset=""></button>
                         <button class="hw-btn" onclick="pauseAudio()"><img src="./icons/pause2.svg" alt="" srcset=""></button>
                         <button class="hw-btn" onclick="stopAudio()"><img src="./icons/stop2.svg" alt="" srcset=""></button>
                         <button class="hw-btn" onclick="playAll()"><img src="./icons/shuffle2.svg" alt="" srcset=""></button>
                         <button class="hw-btn danger" onclick="removeCurrentTrack()"><img src="./icons/bin.png" alt="REM" srcset=""></button>
-
-                        <input class="hw-btn" name="volume" id="volume" oninput="changeVolume()" type="range" min=0
+                        <input class="seek-slider" name="volume" id="volume" oninput="changeVolume()" type="range" min=0
                             max=200 value=100 /></span>
                     </div>
 
@@ -765,6 +806,83 @@
             }
         }
 
+        // 3. Inject this segment INTO your existing initAudioContext() function
+        function connectEqualizerFilters(audioSrc, audioCtx, destinationNode) {
+            let lastNode = audioSrc;
+            filters = []; // Clear array map resetting chains
+
+            freqs.forEach((freq) => {
+                let filter = audioCtx.createBiquadFilter();
+                filter.type = 'peaking';
+                filter.frequency.value = freq;
+                filter.Q.value = 1.0; // Filter bandwidth calculation curve tightness
+                filter.gain.value = 0; // Initialize at perfect flatline unity gain
+
+                lastNode.connect(filter);
+                lastNode = filter; // Pipe into next frequency node module
+                filters.push(filter);
+            });
+
+            // Finally connect the end of the chain to your FFT analyzer or speaker node
+            lastNode.connect(destinationNode);
+        }
+
+        // 4. Live Audio Engine Interceptor Callback Function
+        function updateGain(index, val) {
+            document.getElementById(`gain-${index}`).innerText = `${val}dB`;
+            if (filters[index]) {
+                filters[index].gain.value = parseFloat(val);
+            }
+        }
+
+        const seekBar = document.querySelector("#seekBar");
+        const timeDisplay = document.querySelector("#time");
+
+
+        function formatTimeHHMM(seconds){
+
+            if(isNaN(seconds)) return "0:00";
+
+            const mins = Math.floor(seconds/60);
+            const secs = Math.floor(seconds % 60);
+
+            const formattedTime = `${mins}:${secs <10 ? '0' : ''}${secs}`
+            return formattedTime
+        }
+
+        
+        audio.addEventListener("timeupdate" , ()=>{
+
+            if(!audio.duration) return;
+
+            let percentComplete = (audio.currentTime/audio.duration)*100;
+            seekBar.value = Math.ceil(percentComplete);
+
+            timeDisplay.innerHTML = `${formatTimeHHMM(audio.currentTime)}/${formatTimeHHMM(audio.duration)}`
+
+        })
+
+
+        audio.addEventListener("loadedmetadata" , ()=>{
+
+            timeDisplay.innerHTML = `0:00/${formatTimeHHMM(audio.duration)}`
+
+        })
+
+        
+        seekBar.addEventListener("input" , ()=>{
+
+            console.log(audio.currentTime)
+            
+            if(!audio.duration) return;
+
+            let newTime = (seekBar.value / 100) * audio.duration;
+            audio.currentTime = newTime;
+
+
+        })
+    
+
         function loadTracksFromDB() {
             const transaction = db.transaction(["track"], "readonly");
             const store = transaction.objectStore("track");
@@ -777,11 +895,11 @@
             };
         }
 
-        async function selectTrack(index) {
+         function selectTrack(index) {
             initAudioContext();
             currentTrackIndex = index;
             audio.src = playlist[currentTrackIndex].data;
-            document.getElementById('lcd-title').innerText = playlist[currentTrackIndex].name.toUpperCase().substring(0, 22);
+            document.getElementById('lcd-title').innerText = playlist[currentTrackIndex].name.toUpperCase().substring(4);
             logToTerminal(`Streaming initialized channel data for node ${index + 1}`);
             renderPlaylist();
             playAudio();
@@ -837,7 +955,7 @@
 
         }
 
-        function removeCurrentTrack() {
+        async function removeCurrentTrack() {
             if (currentTrackIndex === -1) return;
 
             const targetId = playlist[currentTrackIndex].id;
@@ -872,7 +990,7 @@
         function changeVolume() {
 
             audio.volume = document.getElementById("volume").value / 200;
-            console.log(audio.volume)
+            //console.log(audio.volume)
         }
 
 
@@ -895,36 +1013,7 @@
             });
         }
 
-        // 3. Inject this segment INTO your existing initAudioContext() function
-        function connectEqualizerFilters(audioSrc, audioCtx, destinationNode) {
-            let lastNode = audioSrc;
-            filters = []; // Clear array map resetting chains
-
-            freqs.forEach((freq) => {
-                let filter = audioCtx.createBiquadFilter();
-                filter.type = 'peaking';
-                filter.frequency.value = freq;
-                filter.Q.value = 1.0; // Filter bandwidth calculation curve tightness
-                filter.gain.value = 0; // Initialize at perfect flatline unity gain
-
-                lastNode.connect(filter);
-                lastNode = filter; // Pipe into next frequency node module
-                filters.push(filter);
-            });
-
-            // Finally connect the end of the chain to your FFT analyzer or speaker node
-            lastNode.connect(destinationNode);
-        }
-
-        // 4. Live Audio Engine Interceptor Callback Function
-        function updateGain(index, val) {
-            document.getElementById(`gain-${index}`).innerText = `${val}dB`;
-            if (filters[index]) {
-                filters[index].gain.value = parseFloat(val);
-            }
-        }
-
-
+        
         async function getFileHash(file) {
 
             const buffer = await file.arrayBuffer();
