@@ -1,6 +1,8 @@
 # MusicPlayer
 Music player with early internet aesthetics. 
 
+## [Open Here](https://harshvar007.github.io/musicPlayer/)
+
 ![FrontEnd Screenshot](frontend.png)
 
 ## Functionalities
