@@ -406,6 +406,54 @@
             background-color: transparent;
             outline: 1px solid black;
         }
+
+        .shuffle-toggle {
+    width: auto;
+    height: 48px;
+    border: 1px solid #8e8e93;
+            border-bottom: 2px solid #1c1c1e;
+            border-right: 2px solid #1c1c1e;
+    background: #444446;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.25s ease;
+}
+
+.shuffle-toggle:hover {
+    background: #292929;
+    transform: scale(1.05);
+    transition: 200ms all ease-in-out;
+}
+
+.shuffle-toggle:active {
+    transform: scale(0.95);
+}
+
+.shuffle-icon {
+    width: 24px;
+    height: 24px;
+    stroke: #b0b0b0;
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
+    transition: 0.25s ease;
+}
+
+/* Active state */
+.shuffle-toggle.active {
+    background: #ff6600;
+    box-shadow: 0 0 12px rgba(255, 152, 0, 0.4);
+}
+
+.shuffle-toggle.active .shuffle-icon {
+    stroke: white;
+    
+}
+
+
     </style>
 </head>
 
@@ -516,12 +564,26 @@
                     <span id="time" style="margin: 5px;">00:00</span>
                   </div>
 
-                    <div style="display:grid; grid-template-columns: repeat(6, 1fr); gap:4px; margin-bottom:10px;">
+                    <div style="display:grid; grid-template-columns: repeat(5, 1fr); gap:4px; margin-bottom:10px;">
                         
                         <button class="hw-btn" onclick="playAudio()"><img src="./icons/play2.svg" alt="" srcset=""></button>
                         <button class="hw-btn" onclick="pauseAudio()"><img src="./icons/pause2.svg" alt="" srcset=""></button>
                         <button class="hw-btn" onclick="stopAudio()"><img src="./icons/stop2.svg" alt="" srcset=""></button>
-                        <button class="hw-btn" onclick="playAll()"><img src="./icons/shuffle2.svg" alt="" srcset=""></button>
+                        <!-- <input type="checkbox" onclick="toggleShuffle(this)" id="shuffleToggle"><img src="./icons/shuffle2.svg" alt="" srcset=""></button> -->
+
+                        <button class="shuffle-toggle" 
+                        id="shuffleBtn" 
+                        aria-label="Toggle Shuffle"
+                        onclick="toggleShuffle()">
+
+                            <svg viewBox="0 0 24 24" class="shuffle-icon">
+                                <path d="M16 3h5v5M21 3l-6 6M4 6h4l9 12h4M4 18h4l3-4M15 14l6 7"/>
+                            </svg>
+
+
+                            
+                        </button>
+
                         <button class="hw-btn danger" onclick="removeCurrentTrack()"><img src="./icons/bin.png" alt="REM" srcset=""></button>
                         <input class="seek-slider" name="volume" id="volume" oninput="changeVolume()" type="range" min=0
                             max=200 value=100 /></span>
@@ -533,27 +595,31 @@
                 </div>
             </div>
         </div>
-
-
-
+        
+        
+        
     </div>
-
+    
     <footer>
         <div>© THEORY7 EXTENSION [2001 - 2026]</div>
         <div>DB STACK: INDEXED_DB // EQ CHANNELS: ACTIVE</div>
     </footer>
-
+    
     <script>
+
         let playlist = [];
         let currentTrackIndex = -1;
-
+        let filelist = [];
         let audioCtx = null;
         let audioSrc = null;
         let analyser = null;
         let dataArray = [];
         let db = null;
+        let isShuffled = false;
+        let index = -1
+        let currentPlaylist = []
         songSearch.value = '';
-
+        
         // Equalizer gain filters array
         let filters = [];
         const freqs = [60, 180, 300, 600, 1000, 3000, 6000, 12000, 14000, 16000];
@@ -564,6 +630,16 @@
         let debounceTimer
         let debounceTime = 500;
         let searchArray = []
+
+        const shuffleBtn = document.querySelector("#shuffleBtn")
+
+        function toggleShuffle(checkbox){
+            isShuffled = !isShuffled
+
+            shuffleBtn.classList.toggle("active");
+
+            playAll()
+        }
 
         class TrieNode {
 
@@ -591,7 +667,7 @@
 
                 if (e.target.value === '') {
                     searchArray = []
-                    renderPlaylist();
+                    renderPlaylist(playlist);
                     return;
                 }
 
@@ -616,7 +692,7 @@
                     searchArray = recursiveDFS(searchArray, current)
 
                     console.log(searchArray)
-                    renderPlaylist();
+                    renderPlaylist(playlist);
 
                 }
             }, debounceTime)
@@ -649,8 +725,9 @@
 
             const fileInput = document.getElementById('track-file');
             const tracks = fileInput;
-            const filelist = tracks.files
-
+           
+            filelist.push(...tracks.files)
+            console.log(filelist)
 
             if (filelist.length == 0) {
                 alert("SYSTEM ERROR: Secure audio source target empty.");
@@ -669,7 +746,7 @@
 
                 let current = masterRoot;
 
-                let songName = filelist[index].name.toLowerCase().substring(4).replace(/\s+/g, '').replace(/\..*/g, '');
+                let songName = filelist[index].name.toLowerCase().replace(/\d+\.{1}/ , '').replace(/\s+/g, '').replace(/\..*/g, '');
 
                 const reader = new FileReader();
 
@@ -697,7 +774,7 @@
 
                             let currChar = songName.charAt(i);
 
-                            console.log(current)
+                            //console.log(current)
 
                             if (!current.children[currChar]) {
 
@@ -872,7 +949,7 @@
         
         seekBar.addEventListener("input" , ()=>{
 
-            console.log(audio.currentTime)
+            //console.log(audio.currentTime)
             
             if(!audio.duration) return;
 
@@ -890,25 +967,27 @@
 
             getAllReq.onsuccess = function (e) {
                 playlist = e.target.result;
-                renderPlaylist();
+                renderPlaylist(playlist);
                 renderFavs();
+                currentPlaylist = [...playlist]
             };
         }
 
          function selectTrack(index) {
             initAudioContext();
             currentTrackIndex = index;
-            audio.src = playlist[currentTrackIndex].data;
-            document.getElementById('lcd-title').innerText = playlist[currentTrackIndex].name.toUpperCase().substring(4);
+            audio.src = currentPlaylist[currentTrackIndex].data;
+            document.getElementById('lcd-title').innerText = currentPlaylist[currentTrackIndex].name.toUpperCase().substring(4);
             logToTerminal(`Streaming initialized channel data for node ${index + 1}`);
-            renderPlaylist();
+            renderPlaylist(currentPlaylist);
             playAudio();
         }
 
         function playAudio() {
-            if (currentTrackIndex === -1 && playlist.length > 0) { selectTrack(0); return; }
+            if (currentTrackIndex === -1 && playlist.length > 0 && !isShuffled) { selectTrack(0); return; }
             if (currentTrackIndex !== -1) {
                 if (audioCtx && audioCtx.state === 'suspended') { audioCtx.resume(); }
+                console.log("playAudio")
                 audio.play();
                 document.getElementById('lcd-state').innerText = "[PLAYING]";
                 document.getElementById('lcd-state').style.color = "#00ff66";
@@ -929,31 +1008,43 @@
             fftBars.forEach(bar => bar.style.height = '0%');
         }
 
+    
+        function fisherYatesShuffle(arr){
+            for (let i = arr.length-1; i > 0 ; i--) {
+                const j  = Math.floor(Math.random() * (i+1));
+                [arr[i],arr[j]] = [arr[j],arr[i]]
+                
+            }
+
+            return arr
+        }
+
         function playAll() {
-
-            let index = Math.floor(Math.random() * playlist.length);
-
-            audio.src = playlist[index].data;
-            console.log(index)
 
             if (audioCtx && audioCtx.state === 'suspended') {
                 audioCtx.resume();
-
             }
-            selectTrack(index);
-            audio.play();
-            document.getElementById('lcd-state').innerText = "[PLAYING]";
-            document.getElementById('lcd-state').style.color = "#00ff66";
 
-            audio.addEventListener("ended", () => {
-                console.log(audio)
+            let currentSongIndex = index;
+            //selectTrack(currentSongIndex)
+
+            setInterval(()=>{
+                if(audio.ended || audio.stopped)
+            {
                 index++;
-                index = index % playlist.length;
-                selectTrack(index);
-                audio.play();
-            });
+                index %= playlist.length;
+
+                if(isShuffled)
+                 index = Math.floor(Math.random()*playlist.length)
+
+                selectTrack(index)
+            }
+            } , 500)
 
         }
+
+        
+
 
         async function removeCurrentTrack() {
             if (currentTrackIndex === -1) return;
@@ -993,7 +1084,6 @@
             //console.log(audio.volume)
         }
 
-
         // 2. Build UI Controls Automatically 
         async function buildManualSliders() {
             const container = document.getElementById('slider-rack');
@@ -1026,7 +1116,8 @@
         }
 
         // Renders the single unified playlist rack array directly into the UI view frame
-        async function renderPlaylist() {
+        function renderPlaylist(playlist) {
+
             const rack = document.getElementById('playlist-rack');
             if (!rack) return;
             rack.innerHTML = '';
@@ -1035,7 +1126,7 @@
             const fav = "./icons/fav.png";
             const unfav = "./icons/unfav.png";
 
-            console.log(fav);
+            //console.log(fav);
 
             if (playlist.length === 0) {
                 rack.innerHTML = '<div style="padding:10px; color:#666; text-align:center;">[ STORAGE REGISTERS EMPTY ]</div>';
